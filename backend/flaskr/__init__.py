@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category, db
 
 QUESTIONS_PER_PAGE = 10
 
@@ -60,20 +60,6 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """    
-    @app.route('/categories/<int:id>/questions', methods=['GET'])
-    def get_category(id: int):
-        page = request.args.get('page', 1, type=int)
-        start = (page-1) * 10
-        end = start+10
-        
-        formatted_questions = [question.format() for question in Question.query.filter_by(category=id)]
-        formatted_categories = [category.format() for category in Category.query.all()]
-        
-        return jsonify(questions = formatted_questions[start:end],
-            total_questions = len(formatted_questions),
-            categories = formatted_categories,
-            current_category = id
-        )
         
     """
     @TODO:
@@ -88,7 +74,7 @@ def create_app(test_config=None):
         Question.query.filter_by(id=id).delete()
         db.session.commit()
         
-        return jsonify()
+        return "Success", 201
 
     """
     @TODO:
@@ -102,23 +88,16 @@ def create_app(test_config=None):
     """
     @app.route('/categories', methods=['GET'])
     def load_categories():
-
-        print([category.format() for category in Category.query.all()])
-
-        return jsonify(
-            category=[category.format() for category in Category.query.all()]
-        )
+        return jsonify(categories = [category.format() for category in Category.query.all()])
+    
     
     @app.route('/questions', methods=['POST'])
     def add_question():
-
-        # Sample question...
-        return jsonify(
-            question = "QUESTION",
-            answer = "ANSWER",
-            difficulty = 3,
-            category = 1,
-        )
+        data = request.get_json()
+        new_question = Question(question=data['question'], answer=data['answer'], difficulty=data['difficulty'], category=data['category'])
+        db.session.add(new_question)
+        db.session.commit()
+        return "Success", 201
 
     """
     @TODO:
@@ -131,6 +110,20 @@ def create_app(test_config=None):
     Try using the word "title" to start.
     """
 
+    @app.route('/??search', methods=['?>???'])
+    def search():
+        data = request.get_json()
+        query = data['query']
+
+        formatted_questions = [question.format() for question in Question.query.filter_by(category=id)]
+        formatted_categories = [category.format() for category in Category.query.all()]
+        
+        return jsonify(
+            questions = formatted_questions,
+            total_questions = len(formatted_questions),
+            categories = formatted_categories,
+            current_category = 0
+        )
 
     """
     @TODO:
@@ -140,6 +133,20 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
+    @app.route('/categories/<int:id>/questions', methods=['GET'])
+    def get_category(id: int):
+        page = request.args.get('page', 1, type=int)
+        start = (page-1) * 10
+        end = start+10
+        
+        formatted_questions = [question.format() for question in Question.query.filter_by(category=id)]
+        formatted_categories = [category.format() for category in Category.query.all()]
+        
+        return jsonify(questions = formatted_questions[start:end],
+            total_questions = len(formatted_questions),
+            categories = formatted_categories,
+            current_category = id
+        )
 
     """
     @TODO:
@@ -152,6 +159,16 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
+    @app.route('/quizzes', methods=['POST'])
+    def play():
+        
+        formatted_questions = [question.format() for question in Question.query.filter_by(category=id)]
+        formatted_categories = [category.format() for category in Category.query.all()]
+        
+        return jsonify(
+            previous_questions = formatted_questions,
+            quiz_category = formatted_categories
+        )
 
     """
     @TODO:
