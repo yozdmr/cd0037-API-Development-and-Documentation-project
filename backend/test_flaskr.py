@@ -15,7 +15,7 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia_test"
-        self.database_path = "postgres://{}/{}".format('localhost:5432', self.database_name)
+        self.database_path = "postgresql://{}:{}@{}/{}".format('postgres', 'password123', 'localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
 
         # binds the app to the current context
@@ -34,6 +34,123 @@ class TriviaTestCase(unittest.TestCase):
     Write at least one test for each test for successful operation and for expected errors.
     """
 
+    
+    def test_get_questions(self):
+        res = self.client().get('/questions')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertTrue(data["total_questions"])
+        self.assertTrue(len(data["categories"]))
+        self.assertTrue(len(data["questions"]))
+    
+    def test_get_questions_bad_request(self):
+        res = self.client().get('/questions?page=99999')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Page not found')
+
+    def test_get_categories(self):
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertTrue(data["categories"])
+
+    def test_get_categories_bad_request(self):
+        res = self.client().delete('/categories')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
+
+    # Actually deletes questions so I keep it commented
+    '''
+    def test_delete_question(self):
+        res = self.client().delete('/questions/20')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 201)
+        self.assertEqual(data["success"], True)
+    '''
+
+
+    def test_delete_question_not_found(self):
+        res = self.client().delete('/questions/99')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Page not found")
+
+    def test_add_question(self):
+        question = {
+            'question': 'Who won the 2022 world cup?',
+            'answer': 'Argentina',
+            'difficulty': 2,
+            'category': 6
+        }
+        res = self.client().post('/questions', json=question)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+
+    def test_search(self):
+        search = {'searchTerm': 'What', }
+        res = self.client().post('/search', json=search)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(len(data['questions']), 8)
+
+    def test_search_not_found(self):
+        res = self.client().post('/search', json={'searchTerm': 'samplerandomstringthatdoesntwork'})
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Page not found')
+    
+    def test_questions_in_category(self):
+        res = self.client().get('/categories/5/questions')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertNotEqual(len(data['questions']), 0)
+        self.assertEqual(data['current_category'], 'Entertainment')
+
+    # TODO: Check functions below for errors
+    '''
+    def test_questions_in_category_not_found(self):
+        res = self.client().get('/categories/100/questions')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+    
+
+    def test_get_quiz(self):
+        res = self.client().post('/quizzes',
+            json={'previous_questions': [],
+                'quiz_category':
+                {'id': 1, 'type': 'Science'}
+            })
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['question'])
+        self.assertEqual(data['question']['category'], 1)
+    '''
+        
+    '''
+    # TODO: Add error checking in quiz funciton
+    def test_quiz_not_found_category(self):
+        quiz = {
+            'previous_questions': [],
+            'quiz_category': {'type': 'NONE','id': 'NONE'}
+        }
+        res = self.client().post('/quizzes', json=quiz)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+    '''
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

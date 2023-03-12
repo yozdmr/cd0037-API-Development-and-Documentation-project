@@ -84,7 +84,7 @@ class QuestionView extends Component {
 
   submitSearch = (searchTerm) => {
     $.ajax({
-      url: `/questions`, //TODO: update request URL
+      url: `/search`, //TODO: update request URL
       type: 'POST',
       dataType: 'json',
       contentType: 'application/json',
@@ -145,11 +145,11 @@ class QuestionView extends Component {
                   this.getByCategory(id);
                 }}
               >
-                {this.state.categories[id].type}
+                {this.state.categories[id]}
                 <img
                   className='category'
-                  alt={`${this.state.categories[id].type.toLowerCase()}`}
-                  src={`${this.state.categories[id].type.toLowerCase()}.svg`}
+                  alt={`${this.state.categories[id].toLowerCase()}`}
+                  src={`${this.state.categories[id].toLowerCase()}.svg`}
                 />
               </li>
             ))}
@@ -163,6 +163,7 @@ class QuestionView extends Component {
               key={q.id}
               question={q.question}
               answer={q.answer}
+              // Making sure the right category id is sent for the icon
               category={this.state.categories[q.category]}
               difficulty={q.difficulty}
               questionAction={this.questionAction(q.id)}
