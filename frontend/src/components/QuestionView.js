@@ -148,8 +148,8 @@ class QuestionView extends Component {
                 {this.state.categories[id].type}
                 <img
                   className='category'
-                  alt={`${this.state.categories[id].type.toLowerCase()}`}
-                  src={`${this.state.categories[id].type.toLowerCase()}.svg`}
+                  alt={`${this.state.categories[id].type}`}
+                  src={`${this.state.categories[id].type}.svg`}
                 />
               </li>
             ))}

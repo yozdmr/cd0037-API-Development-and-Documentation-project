@@ -6,8 +6,6 @@ import random
 
 from models import setup_db, Question, Category, db
 
-QUESTIONS_PER_PAGE = 10
-
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -57,8 +55,8 @@ def create_app(test_config=None):
     """ 
     def paginate(request, questions):
         page = request.args.get('page', 1, type=int)
-        start = (page-1)*QUESTIONS_PER_PAGE
-        end = start+QUESTIONS_PER_PAGE
+        start = (page - 1) * 10
+        end = start + 10
         paginated_questions = [question.format() for question in questions]
 
         return paginated_questions[start:end]
@@ -68,7 +66,7 @@ def create_app(test_config=None):
 
         try:
             formatted_questions = paginate(request, Question.query.all())
-            category_list = [category.type for category in Category.query.all()]
+            category_list = [category.format() for category in Category.query.all()]
             
             if len(formatted_questions) == 0:
                 abort(404)
@@ -167,7 +165,7 @@ def create_app(test_config=None):
     @app.route('/categories/<int:id>/questions', methods=['GET'])
     def get_category(id: int):
         formatted_questions = paginate(request, Question.query.filter_by(category=id))
-        formatted_categories = [category.type for category in Category.query.all()]
+        formatted_categories = [category.format() for category in Category.query.all()]
         if len(formatted_categories) == 0:
             abort(404)
         
