@@ -200,19 +200,13 @@ def create_app(test_config=None):
             questions = Question.query.all()
         else:
             questions = Question.query.filter_by(category=quiz_category['id']).all()
-        
+
+        # How to keep track of which indexes have been checked?        
         rand_index = random.randint(0, len(questions)-1)
         next_question = questions[rand_index]
-        
-        # How to keep track of which indexes have been checked?
+
         return jsonify({
-            'question': {
-                "answer": next_question.answer,
-                "category": next_question.category,
-                "difficulty": next_question.difficulty,
-                "id": next_question.id,
-                "question": next_question.question
-            },
+            'question': next_question.format(),
             'previousQuestion': prev_question
 
             ,'success': True
