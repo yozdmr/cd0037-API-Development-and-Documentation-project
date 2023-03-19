@@ -73,7 +73,6 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], True)
     '''
 
-
     def test_delete_question_not_found(self):
         res = self.client().delete('/questions/99')
         data = json.loads(res.data)
@@ -107,26 +106,25 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Page not found')
-    
+
     def test_questions_in_category(self):
-        res = self.client().get('/categories/3/questions')
+        res = self.client().get('/categories/4/questions')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertNotEqual(len(data['questions']), 0)
-        self.assertEqual(data['categories'][int(data['current_category'])]['type'], 'History')
-    
+        self.assertEqual(data['categories'][data['current_category']], 'History')
+
     def test_get_quiz(self):
         res = self.client().post('/quizzes',
             json={'previous_questions': [],
-                'quiz_category': {'id': 0, 'type': 'Science'}
+                'quiz_category': {'id': '1', 'type': 'Science'}
             })
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['question'])
-        
 
     def test_invalid_quiz_request(self):
         res = self.client().post('/quizzes')

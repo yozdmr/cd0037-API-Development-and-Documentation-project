@@ -33,9 +33,7 @@ def create_app(test_config=None):
     """
     @app.route('/categories', methods=['GET'])
     def load_categories():
-        try: 
-            # [category.type for category in Category.query.all()]
-
+        try:
             temp_ctg = {}
             for c in Category.query.all():
                 temp_ctg[c.id] = c.type
