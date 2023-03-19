@@ -109,48 +109,31 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Page not found')
     
     def test_questions_in_category(self):
-        res = self.client().get('/categories/5/questions')
+        res = self.client().get('/categories/3/questions')
         data = json.loads(res.data)
+
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertNotEqual(len(data['questions']), 0)
-        self.assertEqual(data['current_category'], 'Entertainment')
-
-    # TODO: Check functions below for errors
-    '''
-    def test_questions_in_category_not_found(self):
-        res = self.client().get('/categories/100/questions')
-        data = json.loads(res.data)
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data['success'], False)
+        self.assertEqual(data['categories'][int(data['current_category'])]['type'], 'History')
     
-
     def test_get_quiz(self):
         res = self.client().post('/quizzes',
             json={'previous_questions': [],
-                'quiz_category':
-                {'id': 1, 'type': 'Science'}
+                'quiz_category': {'id': 0, 'type': 'Science'}
             })
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['question'])
-        self.assertEqual(data['question']['category'], 1)
-    '''
         
-    '''
-    # TODO: Add error checking in quiz funciton
-    def test_quiz_not_found_category(self):
-        quiz = {
-            'previous_questions': [],
-            'quiz_category': {'type': 'NONE','id': 'NONE'}
-        }
-        res = self.client().post('/quizzes', json=quiz)
+
+    def test_invalid_quiz_request(self):
+        res = self.client().post('/quizzes')
         data = json.loads(res.data)
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 400)
         self.assertEqual(data['success'], False)
 
-    '''
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

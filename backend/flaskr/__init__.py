@@ -34,8 +34,13 @@ def create_app(test_config=None):
     @app.route('/categories', methods=['GET'])
     def load_categories():
         try: 
+            # [category.type for category in Category.query.all()]
+
+            temp_ctg = {}
+            for c in Category.query.all():
+                temp_ctg[c.id] = c.type
             return jsonify(
-                categories = [category.type for category in Category.query.all()]
+                categories = temp_ctg
 
                 ,success = True)
         except Exception:
@@ -67,6 +72,10 @@ def create_app(test_config=None):
         try:
             formatted_questions = paginate(request, Question.query.all())
             category_list = [category.format() for category in Category.query.all()]
+
+            temp_ctg = {}
+            for c in Category.query.all():
+                temp_ctg[c.id] = c.type
             
             if len(formatted_questions) == 0:
                 abort(404)
@@ -76,7 +85,7 @@ def create_app(test_config=None):
         return jsonify(
             questions=formatted_questions,
             total_questions=len(formatted_questions),
-            categories=category_list
+            categories=temp_ctg
 
             ,success = True
         )
@@ -162,17 +171,22 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
-    @app.route('/categories/<int:id>/questions', methods=['GET'])
-    def get_category(id: int):
+    @app.route('/categories/<id>/questions', methods=['GET'])
+    def get_category(id):
         formatted_questions = paginate(request, Question.query.filter_by(category=id))
         formatted_categories = [category.format() for category in Category.query.all()]
+
+        temp_ctg = {}
+        for c in Category.query.all():
+            temp_ctg[c.id] = c.type
+
         if len(formatted_categories) == 0:
             abort(404)
         
         return jsonify(
             questions = formatted_questions,
             total_questions = len(formatted_questions),
-            categories = formatted_categories,
+            categories = temp_ctg,
             current_category = id
 
             ,success = True
@@ -190,27 +204,42 @@ def create_app(test_config=None):
     and shown whether they were correct or not.
     """
     @app.route('/quizzes', methods=['POST'])
-    def play():
+    def quiz():
         
         data = request.get_json()
+        # Checks to make sure necessary data was passed
+        if data == None:
+            abort(400)
+        
         quiz_category = data['quiz_category']
         prev_question = data['previous_questions']
-        
+
         if (quiz_category['id'] == 0):
             questions = Question.query.all()
         else:
             questions = Question.query.filter_by(category=quiz_category['id']).all()
 
-        # How to keep track of which indexes have been checked?        
-        rand_index = random.randint(0, len(questions)-1)
-        next_question = questions[rand_index]
+        # Stores the IDs of the questions
+        id_list = [question.id for question in questions]
 
-        return jsonify({
-            'question': next_question.format(),
-            'previousQuestion': prev_question
+        if len(id_list) == len(prev_question):
+            return jsonify({'success': True})
 
-            ,'success': True
-        })
+        else:
+            # Gets the index of a random ID from id_list
+            rand_index = random.randint(0, len(id_list)-1)
+
+            # If ID is in the previous quetion list, generate new
+            while id_list[rand_index] in prev_question:
+                rand_index = random.randint(0, len(questions)-1)
+            next_question = questions[rand_index]
+
+            return jsonify({
+                'question': next_question.format(),
+                'previousQuestion': prev_question
+
+                ,'success': True
+            })
 
     """
     @TODO:
