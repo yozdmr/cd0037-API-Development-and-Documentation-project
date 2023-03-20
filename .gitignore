@@ -2,6 +2,7 @@
 __pycache__
 .venv/
 run
+db_info.env
 
 # OS generated files #
 ######################
