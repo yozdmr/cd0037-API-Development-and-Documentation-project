@@ -71,9 +71,10 @@ One note before you delve into your tasks: for each endpoint, you are expected t
 
 You will need to provide detailed documentation of your API endpoints including the URL, request parameters, and the response body. Use the example below as a reference.
 
-### Documentation Example
+## Documentation
 
-`GET '/api/v1.0/categories'`
+### GET /categories
+`GET '/categories'`
 
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Request Arguments: None
@@ -89,6 +90,238 @@ You will need to provide detailed documentation of your API endpoints including 
   "6": "Sports"
 }
 ```
+### GET /questions
+`GET '/questions?page=${integer}'`
+
+- Fetches all the categories, a page of questions (determined through pagination) and the total number of questions
+- Request Arguments: `page` - integer
+- Returns: An object with all categories, paginated questions and total number of questions
+
+```json
+{
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }, 
+  "questions": [
+    {
+      "answer": "Brazil", 
+      "category": 6, 
+      "difficulty": 3, 
+      "id": 10, 
+      "question": "Which is the only team to play in every soccer World Cup tournament?"
+    }, 
+    {
+      "answer": "Uruguay", 
+      "category": 6, 
+      "difficulty": 4, 
+      "id": 11, 
+      "question": "Which country won the first ever soccer World Cup in 1930?"
+    }, 
+    {
+      "answer": "Argentina", 
+      "category": 6, 
+      "difficulty": 1, 
+      "id": 93, 
+      "question": "Which team won the world cup in 2022?"
+    }, 
+    {
+      "answer": "Apollo 13", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 2, 
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    }, 
+    {
+      "answer": "Tom Cruise", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 4, 
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    }, 
+    {
+      "answer": "Edward Scissorhands", 
+      "category": 5, 
+      "difficulty": 3, 
+      "id": 6, 
+      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+    }, 
+    {
+      "answer": "Maya Angelou", 
+      "category": 4, 
+      "difficulty": 2, 
+      "id": 5, 
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    }, 
+    {
+      "answer": "Muhammad Ali", 
+      "category": 4, 
+      "difficulty": 1, 
+      "id": 9, 
+      "question": "What boxer's original name is Cassius Clay?"
+    }, 
+    {
+      "answer": "George Washington Carver", 
+      "category": 4, 
+      "difficulty": 2, 
+      "id": 12, 
+      "question": "Who invented Peanut Butter?"
+    }, 
+    {
+      "answer": "Scarab", 
+      "category": 4, 
+      "difficulty": 4, 
+      "id": 23, 
+      "question": "Which dung beetle was worshipped by the ancient Egyptians?"
+    }
+  ], 
+  "success": true, 
+  "total_questions": 22
+}
+```
+
+### DELETE /questions/<int:question_id>
+`DELETE '/questions/${id}'`
+
+- Deletes a question given the provided ID
+- Request Arguments: `id` - Integer
+- Returns: Status code 201, and if the deletion fails aborts with status code 404
+
+### POST /questions
+`POST '/questions'`
+
+- Sends a post request in order to add a new question
+- Request Body:
+
+```json
+{
+  "question": "What is Obama's last name?",
+  "answer": "Care",
+  "difficulty": 5,
+  "category": 5
+}
+```
+
+- Returns: Does not return any new data
+
+## POST /questions/search
+`POST '/questions'`
+
+- Sends a POST request that searches through the questions to find ones that match the provided string
+- Request Body:
+```json
+{
+  "searchTerm": "A sample search string"
+}
+```
+- Returns: An object with the resulting set of questions and the number of questions that were provided
+
+```json
+  "questions": [
+    {
+      "answer": "Brazil", 
+      "category": 6, 
+      "difficulty": 3, 
+      "id": 10, 
+      "question": "Which is the only team to play in every soccer World Cup tournament?"
+    }, 
+    {
+      "answer": "Uruguay", 
+      "category": 6, 
+      "difficulty": 4, 
+      "id": 11, 
+      "question": "Which country won the first ever soccer World Cup in 1930?"
+    }
+  ],
+  "total_questions": 2
+}
+```
+
+### GET /categories/<int:category_id>/questions
+`GET '/categories/${id}/questions'`
+
+- Gets all of the quetions that are within the provided category
+- Request Arguments: `id` - Integer
+- Returns: An object with all categories, paginated questions and total number of questions within the category
+
+```json
+{
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }, 
+  "current_category": "2", 
+  "questions": [
+    {
+      "answer": "Escher", 
+      "category": 2, 
+      "difficulty": 1, 
+      "id": 16, 
+      "question": "Which Dutch graphic artist\u2013initials M C was a creator of optical illusions?"
+    }, 
+    {
+      "answer": "Mona Lisa", 
+      "category": 2, 
+      "difficulty": 3, 
+      "id": 17, 
+      "question": "La Giaconda is better known as what?"
+    }, 
+    {
+      "answer": "One", 
+      "category": 2, 
+      "difficulty": 4, 
+      "id": 18, 
+      "question": "How many paintings did Van Gogh sell in his lifetime?"
+    }, 
+    {
+      "answer": "Jackson Pollock", 
+      "category": 2, 
+      "difficulty": 2, 
+      "id": 19, 
+      "question": "Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?"
+    }
+  ], 
+  "success": true, 
+  "total_questions": 4
+}
+```
+### POST /quizzes
+`POST '/quizzes'`
+
+- Sends a POST request to display the current question information and provide information about which questions have been visited. This is used to create a working quiz game.
+- Request Body:
+
+```json
+{
+  "quiz_category": "Science",
+  "previousQuestion": [17, 18]
+}
+```
+- Returns: An object with a new question
+
+```json
+{
+  "question": {
+    "answer": "Jackson Pollock", 
+    "category": 2, 
+    "difficulty": 2, 
+    "id": 19, 
+    "question": "Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?"
+  },
+  "previousQuestion": [17, 18],
+  "success": true
+}
+```
+
+
 
 ## Testing
 
