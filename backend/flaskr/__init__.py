@@ -41,7 +41,7 @@ def create_app(test_config=None):
                 categories = temp_ctg
 
                 ,success = True)
-        except Exception:
+        except:
             abort(405)
 
     """
@@ -77,7 +77,7 @@ def create_app(test_config=None):
             
             if len(formatted_questions) == 0:
                 abort(404)
-        except Exception:
+        except:
             abort(404)
 
         return jsonify(
@@ -97,7 +97,6 @@ def create_app(test_config=None):
     """
     @app.route('/questions/<int:id>', methods=['DELETE'])
     def delete_question(id: int):
-        
         question = Question.query.filter_by(id=id).one_or_none()
         if question is None:
             abort(404)
@@ -119,15 +118,17 @@ def create_app(test_config=None):
     
     @app.route('/questions', methods=['POST'])
     def add_question():
-        data = request.get_json()
-        new_question = Question(
-            question=data['question'], 
-            answer=data['answer'], 
-            difficulty=data['difficulty'], 
-            category=data['category'])
-        db.session.add(new_question)
-        db.session.commit()
-        return jsonify(success = True)
+        try:
+            data = request.get_json()
+            new_question = Question(
+                question=data['question'], 
+                answer=data['answer'], 
+                difficulty=data['difficulty'], 
+                category=data['category'])
+            Question.insert(new_question)
+            return jsonify(success = True)
+        except:
+            abort(400)
 
     """
     @TODO:
@@ -140,16 +141,22 @@ def create_app(test_config=None):
     Try using the word "title" to start.
     """
 
-    # TODO: Not working yet, troubleshoot
     @app.route('/search', methods=['POST'])
     def search():
+        search_term = request.get_json().get("searchTerm")
+        
+        # NOTE: I do not have any issues with the search term being None, but I
+        # included this just in case an issue occurs.
+        if search_term == None:
+            abort(404)
+
         data = request.get_json()
         question_list = Question.query.all()
         result_list = []
 
-        for question in question_list:
-            if data['searchTerm'].lower() in question.question.lower():
-                result_list.append(question.format())
+        for q in question_list:
+            if search_term.lower() in q.question.lower():
+                result_list.append(q.format())
 
         if len(result_list) > 0:
             return jsonify(
@@ -171,24 +178,28 @@ def create_app(test_config=None):
     """
     @app.route('/categories/<id>/questions', methods=['GET'])
     def get_category(id):
-        formatted_questions = paginate(request, Question.query.filter_by(category=id))
-        formatted_categories = [category.format() for category in Category.query.all()]
-
-        temp_ctg = {}
-        for c in Category.query.all():
-            temp_ctg[c.id] = c.type
-
-        if len(formatted_categories) == 0:
-            abort(404)
         
-        return jsonify(
-            questions = formatted_questions,
-            total_questions = len(formatted_questions),
-            categories = temp_ctg,
-            current_category = id
+        try:
+            formatted_questions = paginate(request, Question.query.filter_by(category=id))
+            formatted_categories = [category.format() for category in Category.query.all()]
 
-            ,success = True
-        )
+            temp_ctg = {}
+            for c in Category.query.all():
+                temp_ctg[c.id] = c.type
+
+            if len(formatted_categories) == 0:
+                abort(404)
+            
+            return jsonify(
+                questions = formatted_questions,
+                total_questions = len(formatted_questions),
+                categories = temp_ctg,
+                current_category = id
+
+                ,success = True
+            )
+        except:
+            abort(405)
 
     """
     @TODO:
